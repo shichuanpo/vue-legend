@@ -29,6 +29,7 @@
       a.pageButton.triangle_border_left(@click="pageChange('sub')", :class="{'disabled': currentPage <= 1}")
       span {{paginationText}}
       a.pageButton.triangle_border_right(@click="pageChange('add')", :class="{'disabled': currentPage >= items.length}")
+  slot
 </template>
 <script>
 /* eslint-disable no-underscore-dangle */
@@ -250,8 +251,8 @@ export default {
       if (
         !this.legend.show ||
         !this.$refs.legend ||
-        this.$el.clientWidth <= 0 ||
-        this.$el.clientHeight <= 0) return
+        this.$el.parentNode.clientWidth <= 0 ||
+        this.$el.parentNode.clientHeight <= 0) return
       const {
         paddingTop,
         paddingLeft,
@@ -287,9 +288,9 @@ export default {
       }
       this.legendHeight = this.$refs.legend.clientHeight - (padding.top + padding.bottom)
       this.legendWidth = this.$refs.legend.clientWidth - (padding.left + padding.right)
-      let maxLegendHeight = this.$el.clientHeight -
+      let maxLegendHeight = this.$el.parentNode.clientHeight -
         (padding.top + padding.bottom + margin.top + margin.bottom + border.top + border.bottom)
-      let maxLegendWidth = this.$el.clientWidth -
+      let maxLegendWidth = this.$el.parentNode.clientWidth -
         (padding.left + padding.right + margin.left + margin.right + border.left + border.right)
       let itemsHeight = 0
       let itemsWidth = 0
@@ -397,14 +398,12 @@ export default {
 <style lang="less" scoped>
 .legend__container {
   text-align: left;
-  width: 100%;
-  height: 100%;
   box-sizing: border-box;
-  overflow: hidden;
-  position: relative;
+  display: inline;
 }
 .legend__container--box {
-  position: absolute;
+  position: relative;
+  width: auto;
   clear: both;
   z-index: 1000;
   &.calc {
@@ -434,7 +433,7 @@ export default {
     }
   }
   &.vertical {
-    display: block;
+    position: absolute;
     &.scroll {
       .items {
         float: none !important;
