@@ -9,6 +9,8 @@
     )
       span.tag(:style="[_item.tagStyle, legendModel[_item.name] ? _item.activeTagStyle : _item.inactiveTagStyle]")
       span.text(:style="[_item.textStyle, legendModel[_item.name] ? _item.activeTextStyle : _item.inactiveTextStyle]", :title="_item.formatter ? _item.formatter(_item.name) : _item.name") {{_item.formatter ? _item.formatter(_item.name) : _item.name}}
+      a.icon-setting(v-if="editable", :style="_item.textStyle")
+        img(src="./svgs/setting.svg")
     .pagination(ref="pagination", v-if="items.length > 1 && legend.type === 'scroll'")
       a.pageButton.triangle_border_left
       span {{paginationText}}
@@ -25,6 +27,8 @@
           )
             span.tag(:style="[_item.tagStyle, legendModel[_item.name] ? _item.activeTagStyle : _item.inactiveTagStyle]")
             span.text(:style="[_item.textStyle, legendModel[_item.name] ? _item.activeTextStyle : _item.inactiveTextStyle]", :title="_item.formatter ? _item.formatter(_item.name) : _item.name") {{_item.formatter ? _item.formatter(_item.name) : _item.name}}
+            a.icon-setting(v-if="editable", @click.stop="settingHandler(_item, _itemIdx)", :style="_item.textStyle")
+              img(src="./svgs/setting.svg")
     .pagination(v-if="items.length > 1 && legend.type === 'scroll'")
       a.pageButton.triangle_border_left(@click="pageChange('sub')", :class="{'disabled': currentPage <= 1}")
       span {{paginationText}}
@@ -32,10 +36,8 @@
   slot
 </template>
 <script>
-/* eslint-disable no-underscore-dangle */
 import { merge, isObject } from './util'
-import { legendOption, baseColor } from './defaultConfig'
-
+import { legendOption, baseColor } from './defaultConfig.js'
 export default {
   name: 'vueLegend',
   props: {
@@ -43,12 +45,16 @@ export default {
       type: Object,
       default: () => {}
     },
-    model: {
-      type: Object
-    },
     data: {
       type: Array,
       default: () => []
+    },
+    model: {
+      type: Object
+    },
+    editable: {
+      type: Boolean,
+      default: true
     }
   },
   model: {
@@ -74,11 +80,6 @@ export default {
     paginationText () {
       return `${this.currentPage} / ${this.itemsLength}`
     },
-    itemsboxStyle () {
-      return this.legend.orient === 'vertical'
-        ? { height: `${this.legendHeight}px` }
-        : { width: `${this.legendWidth}px` }
-    },
     /**
      * 图例model，记录每个item点击状态
      */
@@ -94,6 +95,7 @@ export default {
     /**
      * 合并图例的配置信息
      */
+
     legend () {
       return merge({}, legendOption || {}, this.option || {}) || {}
     },
@@ -110,45 +112,28 @@ export default {
      * } 可以为item配置
      */
     dataWithStyle () {
-      const {
-        tagStyle,
-        activeTagStyle,
-        inactiveTagStyle,
-        textStyle,
-        activeTextStyle,
-        inactiveTextStyle,
-        formatter
-      } = legendOption
+      const { tagStyle, activeTagStyle, inactiveTagStyle, textStyle, activeTextStyle, inactiveTextStyle, formatter } = legendOption
       return (this.data || []).map((item, _idx) => {
-        const _defaultOption = merge({}, {
-          tagStyle,
-          activeTagStyle,
-          inactiveTagStyle,
-          textStyle,
-          activeTextStyle,
-          inactiveTextStyle,
-          formatter
-        })
+        const _defaultOption = merge({}, { tagStyle, activeTagStyle, inactiveTagStyle, textStyle, activeTextStyle, inactiveTextStyle, formatter })
         const _color = baseColor[_idx % baseColor.length]
         if (isObject(item)) {
           if (item.name) {
             const _item = merge({}, {
               activeTagStyle: {
-                backgroundColor: _color,
-                borderColor: _color
+                'backgroundColor': _color,
+                'borderColor': _color
               },
-              activeTextStyle: {
-                color: _color
-              }
+              activeTextStyle: { color: _color }
             }, item)
-            return merge(_defaultOption, _item, this.option || {}) || {}
+            return merge(_defaultOption, _item, this.option || {})
+          } else {
+            // console.error('请给图例添加命名name！')
           }
-          // console.error('请给图例添加命名name！')
         } else if (typeof item === 'string') {
           return merge(_defaultOption, {
             activeTagStyle: {
-              backgroundColor: _color,
-              borderColor: _color
+              'backgroundColor': _color,
+              'borderColor': _color
             },
             activeTextStyle: { color: _color },
             name: item
@@ -156,51 +141,52 @@ export default {
         } else {
           // console.error('传参错误，data为对象数组或者字符串数组！')
         }
-        return null
       })
     },
     /**
      * 单项图例的样式
      */
+
     itemStyle () {
       const styleText = `${this.legend.itemGap || 0}px`
       if (this.legend.type === 'scroll') {
         if (this.legend.orient === 'horizontal') {
           return {
-            marginRight: styleText
+            'marginRight': styleText
           }
-        }
-        if (this.legend.orient === 'vertical') {
+        } else if (this.legend.orient === 'vertical') {
           return {
-            marginBottom: styleText
+            'marginBottom': styleText
           }
         }
       }
       return {
-        marginRight: styleText,
-        marginBottom: styleText,
-        cursor: this.legend.disabled ? 'default' : 'pointer'
+        'marginRight': styleText,
+        'marginBottom': styleText,
+        'cursor': this.legend.disabled ? 'default' : 'pointer'
       }
     },
-    /**
+    /****
      * 分页组图例的样式
      */
+
     itemsPaneStyle () {
       const style = {}
       if (this.legend.type === 'scroll') {
         if (this.legend.orient === 'horizontal') {
-          const left = this.itemsWH.slice(0, this.currentPage - 1)
-            .reduce((total, current) => total + current.width, 0)
-          style.marginLeft = `${-left}px`
+          const left = this.itemsWH.slice(0, this.currentPage - 1).reduce((total, current) => {
+            return total + current.width
+          }, 0)
+          style.marginLeft = -left + 'px'
           return {
-            marginLeft: `${-left}px`,
+            marginLeft: -left + 'px',
             transition: 'all 0.6s'
           }
-        }
-        if (this.legend.orient === 'vertical') {
-          const top = this.itemsWH.slice(0, this.currentPage - 1)
-            .reduce((total, current) => total + current.height, 0)
-          style.marginTop = `${-top}px`
+        } else if (this.legend.orient === 'vertical') {
+          const top = this.itemsWH.slice(0, this.currentPage - 1).reduce((total, current) => {
+            return total + current.height
+          }, 0)
+          style.marginTop = -top + 'px'
         }
         if (this.legend.animation) {
           style.transition = `all ${this.legend.animationDurationUpdate}s`
@@ -230,29 +216,27 @@ export default {
   methods: {
     init () {
       this.getLegendLayout()
-      this.dataWithStyle.forEach((item) => {
-        this.legendModel[item.name] = this.legendModel[item.name] === undefined
-          ? true
-          : !!this.legendModel[item.name]
+      this.dataWithStyle.forEach(item => {
+        this.legendModel[item.name] = this.legendModel[item.name] === undefined ? true : !!this.legendModel[item.name]
       })
+    },
+    settingHandler (item, index) {
+      this.$emit('setting', merge({}, item, { index }))
     },
     pageChange (type = 'add') {
       if (type === 'add' && this.currentPage < this.items.length) {
-        this.currentPage += 1
+        this.currentPage++
       } else if (type === 'sub' && this.currentPage > 1) {
-        this.currentPage -= 1
+        this.currentPage--
       }
     },
-    /**
+    /****
      * 布局计算
      */
+
     async getLegendLayout () {
       await this.$nextTick()
-      if (
-        !this.legend.show ||
-        !this.$refs.legend ||
-        this.$el.parentNode.clientWidth <= 0 ||
-        this.$el.parentNode.clientHeight <= 0) return
+      if (!this.legend.show || !this.$refs.legend || this.$el.parentNode.clientWidth <= 0 || this.$el.parentNode.clientHeight <= 0) return
       const {
         paddingTop,
         paddingLeft,
@@ -288,10 +272,8 @@ export default {
       }
       this.legendHeight = this.$refs.legend.clientHeight - (padding.top + padding.bottom)
       this.legendWidth = this.$refs.legend.clientWidth - (padding.left + padding.right)
-      let maxLegendHeight = this.$el.parentNode.clientHeight -
-        (padding.top + padding.bottom + margin.top + margin.bottom + border.top + border.bottom)
-      let maxLegendWidth = this.$el.parentNode.clientWidth -
-        (padding.left + padding.right + margin.left + margin.right + border.left + border.right)
+      let maxLegendHeight = this.$el.parentNode.clientHeight - (padding.top + padding.bottom + margin.top + margin.bottom + border.top + border.bottom)
+      let maxLegendWidth = this.$el.parentNode.clientWidth - (padding.left + padding.right + margin.left + margin.right + border.left + border.right)
       let itemsHeight = 0
       let itemsWidth = 0
       const items = []
@@ -301,16 +283,14 @@ export default {
       const paginationHeight = this.$refs.pagination ? this.$refs.pagination.clientHeight : 0
       if (this.legend.orient === 'horizontal') {
         if (this.legend.type === 'scroll') {
-          const allItemsWidth = this.dataWithStyle
-            .reduce(
-              (total, item) => this.$refs[item.name][0].offsetWidth +
-                (this.legend.itemGap || 0) + total, 0
-            )
+          const allItemsWidth = this.dataWithStyle.reduce((total, item) => {
+            return this.$refs[item.name][0].offsetWidth + (this.legend.itemGap || 0) + total
+          }, 0)
           if (allItemsWidth > maxLegendWidth) {
             maxLegendWidth -= paginationWidth
           }
         }
-        this.dataWithStyle.forEach((item) => {
+        this.dataWithStyle.forEach(item => {
           const itemWidth = this.$refs[item.name][0].offsetWidth + (this.legend.itemGap || 0)
           itemsWidth += itemWidth
           if (itemsWidth > maxLegendWidth) {
@@ -327,16 +307,14 @@ export default {
           this.itemsFloat = 'right'
         }
         if (this.legend.type === 'scroll') {
-          const allItemsHeight = this.dataWithStyle
-            .reduce(
-              (total, item) => this.$refs[item.name][0].offsetHeight +
-                (this.legend.itemGap || 0) + total, 0
-            )
+          const allItemsHeight = this.dataWithStyle.reduce((total, item) => {
+            return this.$refs[item.name][0].offsetHeight + (this.legend.itemGap || 0) + total
+          }, 0)
           if (allItemsHeight > maxLegendHeight) {
             maxLegendHeight -= paginationHeight
           }
         }
-        this.dataWithStyle.forEach((item) => {
+        this.dataWithStyle.forEach(item => {
           const itemHeight = this.$refs[item.name][0].offsetHeight + (this.legend.itemGap || 0)
           itemsHeight += itemHeight
           if (itemsHeight > maxLegendHeight) {
@@ -377,13 +355,13 @@ export default {
     },
     itemClick (categoryName) {
       this.legendModel[categoryName] = !this.legendModel[categoryName]
-      this.legendModel = this.legendModel // setter触发
+      this.$set(this, 'legendModel', this.legendModel) // setter触发
     },
     itemDblClick (categoryName) {
-      Object.keys(this.legendModel).forEach((_categoryName) => {
+      Object.keys(this.legendModel).forEach(_categoryName => {
         this.legendModel[_categoryName] = _categoryName === categoryName
       })
-      this.legendModel = this.legendModel // setter触发
+      this.$set(this, 'legendModel', this.legendModel) // setter触发
     }
   },
   mounted () {
@@ -399,10 +377,9 @@ export default {
 .legend__container {
   text-align: left;
   box-sizing: border-box;
-  display: inline;
 }
 .legend__container--box {
-  position: relative;
+  position: absolute;
   width: auto;
   clear: both;
   z-index: 1000;
@@ -433,7 +410,6 @@ export default {
     }
   }
   &.vertical {
-    position: absolute;
     &.scroll {
       .items {
         float: none !important;
@@ -458,6 +434,13 @@ export default {
     img {
       display: block;
       margin: 0 auto;
+    }
+    .icon-setting{
+      padding: 0;
+      height: 100%;
+      img{
+        height: 100%;
+      }
     }
   }
   .pagination {

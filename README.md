@@ -26,6 +26,7 @@
   value / v-model | 绑定值 | Object | - | -|
   data | 图例数据 | Array | - | []|
   option | 图例配置 | Object | - | {}|
+  editable | 编辑状态 | Boolean | true/false | false
 
   ### option
   ```javascript
