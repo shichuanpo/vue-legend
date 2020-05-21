@@ -10,7 +10,7 @@
       span.tag(:style="[_item.tagStyle, legendModel[_item.name] ? _item.activeTagStyle : _item.inactiveTagStyle]")
       span.text(:style="[_item.textStyle, legendModel[_item.name] ? _item.activeTextStyle : _item.inactiveTextStyle]", :title="_item.formatter ? _item.formatter(_item.name) : _item.name") {{_item.formatter ? _item.formatter(_item.name) : _item.name}}
       a.icon-setting(v-if="editable", :style="_item.textStyle")
-        img(:src="settingIcon")
+        svg-icon(:icon-name="'setting'")
     .pagination(ref="pagination", v-if="items.length > 1 && legend.type === 'scroll'")
       a.pageButton.triangle_border_left
       span {{paginationText}}
@@ -28,7 +28,7 @@
             span.tag(:style="[_item.tagStyle, legendModel[_item.name] ? _item.activeTagStyle : _item.inactiveTagStyle]")
             span.text(:style="[_item.textStyle, legendModel[_item.name] ? _item.activeTextStyle : _item.inactiveTextStyle]", :title="_item.formatter ? _item.formatter(_item.name) : _item.name") {{_item.formatter ? _item.formatter(_item.name) : _item.name}}
             a.icon-setting(v-if="editable", @click.stop="settingHandler(_item, _itemIdx)", :style="_item.textStyle")
-              img(:src="settingIcon")
+              svg-icon(:icon-name="'setting'")
     .pagination(v-if="items.length > 1 && legend.type === 'scroll'")
       a.pageButton.triangle_border_left(@click="pageChange('sub')", :class="{'disabled': currentPage <= 1}")
       span {{paginationText}}
@@ -38,9 +38,10 @@
 <script>
 import { merge, isObject } from './util'
 import { legendOption, baseColor } from './defaultConfig.js'
-import settingIcon from './img/setting.png'
+import svgIcon from './svg-icon.vue'
 export default {
   name: 'vueLegend',
+  components: { svgIcon },
   props: {
     option: {
       type: Object,
@@ -52,10 +53,6 @@ export default {
     },
     model: {
       type: Object
-    },
-    editable: {
-      type: Boolean,
-      default: false
     }
   },
   model: {
@@ -64,7 +61,6 @@ export default {
   },
   data () {
     return {
-      settingIcon,
       timeStamp: 0,
       defaultColor: '#ddd',
       defaultImage: '#ddd',
@@ -79,6 +75,9 @@ export default {
     }
   },
   computed: {
+    editable () {
+      return !!Object.entries(this.$listeners).find(([type]) => type === 'setting')
+    },
     paginationText () {
       return `${this.currentPage} / ${this.itemsLength}`
     },
@@ -433,16 +432,9 @@ export default {
     input {
       display: none;
     }
-    img {
-      display: block;
-      margin: 0 auto;
-    }
     .icon-setting{
       padding: 0;
       height: 100%;
-      img{
-        height: 100%;
-      }
     }
   }
   .pagination {

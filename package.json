@@ -1,6 +1,6 @@
 {
   "name": "vue-legend",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "main": "lib/vue-legend.common.js",
   "author": "shichuanpo <yangdongfeng8@126.com>",
   "scripts": {
@@ -15,16 +15,16 @@
   "keywords": [
     "legend"
   ],
+  "files": [
+    "lib"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/shichuanpo/vue-legend/issues"
   },
   "homepage": "https://github.com/shichuanpo/vue-legend",
-  "peerDependencies": {
-    "core-js": "^3.4.4",
-    "vue": "^2.6.10"
-  },
   "devDependencies": {
+    "core-js": "^3.4.4",
     "@vue/cli-plugin-babel": "^4.1.0",
     "@vue/cli-plugin-eslint": "^4.1.0",
     "@vue/cli-service": "^4.1.0",
@@ -32,10 +32,12 @@
     "babel-eslint": "^10.0.3",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
-    "vue-template-compiler": "^2.6.10",
     "less": "^3.0.4",
     "less-loader": "^4.1.0",
     "pug": "^2.0.3",
-    "pug-plain-loader": "^1.0.0"
+    "pug-plain-loader": "^1.0.0",
+    "svg-sprite-loader": "^5.0.0",
+    "vue": "^2.6.10",
+    "vue-template-compiler": "^2.6.10"
   }
 }

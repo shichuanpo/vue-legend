@@ -26,7 +26,6 @@
   value / v-model | 绑定值 | Object | - | -|
   data | 图例数据 | Array | - | []|
   option | 图例配置 | Object | - | {}|
-  editable | 编辑状态 | Boolean | true/false | false
 
   ### option
   ```javascript
@@ -111,4 +110,5 @@ data = [{
 事件名 | 说明 | 参数
 :-: | :-: | :-:
 change | 图例变化 | legendMode
+setting | 图例配置 | 图例样式
 

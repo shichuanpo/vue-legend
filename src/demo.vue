@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <vue-legend :data='legendData' :editable="true"/>
+    <vue-legend :data='legendData'/>
   </div>
 </template>
 
