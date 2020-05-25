@@ -53,6 +53,9 @@ export default {
     },
     model: {
       type: Object
+    },
+    editable: {
+      type: Boolean
     }
   },
   model: {
@@ -75,9 +78,6 @@ export default {
     }
   },
   computed: {
-    editable () {
-      return !!Object.entries(this.$listeners).find(([type]) => type === 'setting')
-    },
     paginationText () {
       return `${this.currentPage} / ${this.itemsLength}`
     },
