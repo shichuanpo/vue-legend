@@ -1,6 +1,6 @@
 {
   "name": "vue-legend",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "main": "lib/vue-legend.common.js",
   "author": "shichuanpo <yangdongfeng8@126.com>",
   "scripts": {
